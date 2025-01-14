@@ -1,0 +1,108 @@
+indicator("VWAP, CMF, OBV with EMA/SMA and 50 EMA", shorttitle="VWAP & Signals", overlay=true)
+
+
+
+// Inputs
+
+vwapLength = input.int(14, title="VWAP Length")
+
+cmfLength = input.int(20, title="CMF Length")
+
+obvLength = input.int(10, title="OBV Length")
+
+
+
+// VWAP Calculation
+
+vwap = ta.vwap(close)
+
+
+
+// Chaikin Money Flow (CMF) Calculation
+
+highLowDiff = high - low
+
+moneyFlowMultiplier = ((close - low) - (high - close)) / highLowDiff
+
+moneyFlowVolume = moneyFlowMultiplier * volume
+
+cmf = ta.sma(moneyFlowVolume, cmfLength) / ta.sma(volume, cmfLength)
+
+
+
+// On-Balance Volume (OBV) Calculation (Manual)
+
+obv = ta.cum(na(close[1]) ? 0 : (close > close[1] ? volume : close < close[1] ? -volume : 0))
+
+obvSma = ta.sma(obv, obvLength)
+
+
+
+// Buy and Sell Signals
+
+buySignal = (obv > obvSma) and (cmf > 0)
+
+sellSignal = (obv < obvSma) and (cmf < 0)
+
+
+
+// Plot Buy and Sell Signals
+
+plotshape(series=buySignal, title="Buy Signal", location=location.belowbar, color=color.green, style=shape.labelup, text="BUY")
+
+plotshape(series=sellSignal, title="Sell Signal", location=location.abovebar, color=color.red, style=shape.labeldown, text="SELL")
+
+
+
+// Plot VWAP
+
+plot(vwap, title="VWAP", color=color.blue)
+
+
+
+// EMA/SMA with Color Coding
+
+emaplot = input(true, title="Show EMA on chart")
+
+len = input.int(8, title="EMA Length")
+
+src = close
+
+emaOut = ta.ema(src, len)
+
+up = emaOut > emaOut[1]
+
+down = emaOut < emaOut[1]
+
+myColor = up ? color.green : down ? color.red : color.blue
+
+plot(emaplot ? emaOut : na, title="EMA", color=myColor, linewidth=3)
+
+
+
+smaplot = input(false, title="Show SMA on chart")
+
+len2 = input.int(8, title="SMA Length")
+
+src2 = close
+
+smaOut = ta.sma(src2, len2)
+
+up2 = smaOut > smaOut[1]
+
+down2 = smaOut < smaOut[1]
+
+myColor2 = up2 ? color.green : down2 ? color.red : color.blue
+
+plot(smaplot ? smaOut : na, title="SMA", color=myColor2, linewidth=1)
+
+
+
+// 50 EMA
+
+show50EMA = input(true, title="Show 50 EMA on chart")
+
+ema50 = ta.ema(close, 50)
+
+plot(show50EMA ? ema50 : na, title="50 EMA", color=color.orange, linewidth=2)
+

@@ -1,0 +1,30 @@
+instrument {name = "Swing Pivots High Low", overlay = true, icon = "indicators:BB"}
+
+input_group {"Pivot High Settings", leftLenH = input(5, "Pivot High Left Length", input.integer, 1), rightLenH = input(5, "Pivot High Right Length", input.integer, 1), colorH = input_color("Pivot High Color", "red")}
+
+input_group {
+    "Pivot Low Settings",
+    leftLenL = input(5, "Pivot Low Left Length", input.integer, 1),
+    rightLenL = input(5, "Pivot Low Right Length", input.integer, 1),
+    colorL = input_color("Pivot Low Color", "blue")}
+
+// Helper Functions for Pivot High and Low
+function pivotHigh(left, right) {
+    return highest(close, left) < high and lowest(close, right) < high ? high : na;}
+
+function pivotLow(left, right) {
+    return lowest(close, left) > low and highest(close, right) > low ? low : na;}
+
+// Calculate Pivot High and Pivot Low
+ph = pivotHigh(leftLenH, rightLenH);
+pl = pivotLow(leftLenL, rightLenL);
+
+// Plot Pivot Highs and Lows
+plot(ph, "Pivot High", colorH, plot.style_circles);
+plot(pl, "Pivot Low", colorL, plot.style_circles);
+
+// Alerts for Crossovers
+alert(close > ph, "Price Crossed Above Pivot High");
+alert(close < ph, "Price Crossed Below Pivot High");
+alert(close > pl, "Price Crossed Above Pivot Low");
+alert(close < pl, "Price Crossed Below Pivot Low");
